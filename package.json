@@ -1,14 +1,36 @@
 {
   "name": "clockodo-mcp",
   "version": "0.1.0",
+  "description": "MCP server for Clockodo time tracking API",
+  "keywords": ["mcp", "clockodo", "time-tracking", "model-context-protocol"],
+  "author": "Roland Wallner",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rolandwallner/clockodo-mcp.git"
+  },
+  "homepage": "https://github.com/rolandwallner/clockodo-mcp#readme",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "clockodo-mcp": "dist/index.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "vitest",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "build": "tsc",
-    "dev": "tsx watch src/index.ts"
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsx watch src/index.ts",
+    "prepublishOnly": "npm run typecheck && npm test -- --run && npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
