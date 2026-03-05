@@ -384,7 +384,7 @@ describe("ClockodoClient", () => {
         .mockResolvedValueOnce(makeErrorResponse(401, "Unauthorized"));
 
       await expect(client.listCustomers()).rejects.toThrow(ClockodoApiError);
-      await expect(client.listCustomers()).rejects.toThrow("Clockodo API error 401: Unauthorized");
+      await expect(client.listCustomers()).rejects.toThrow("Clockodo API error: HTTP 401");
     });
 
     it("throws ClockodoApiError on 429 response", async () => {

@@ -40,16 +40,12 @@ describe("handleListServices()", () => {
 
   it("returns isError true with error message when client throws", async () => {
     const client = makeClient({
-      listServices: vi
-        .fn()
-        .mockRejectedValueOnce(new Error("Clockodo API error 401: Unauthorized")),
+      listServices: vi.fn().mockRejectedValueOnce(new Error("Clockodo API error: HTTP 401")),
     });
 
     const result = await handleListServices(client);
 
     expect(result.isError).toBe(true);
-    expect(result.content).toEqual([
-      { type: "text", text: "Error: Clockodo API error 401: Unauthorized" },
-    ]);
+    expect(result.content).toEqual([{ type: "text", text: "Error: Clockodo API error: HTTP 401" }]);
   });
 });

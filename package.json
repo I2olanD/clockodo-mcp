@@ -13,7 +13,6 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json && chmod +x dist/index.js",
-    "prepare": "npm run build",
     "dev": "tsx watch src/index.ts",
     "test": "vitest",
     "lint": "biome check .",

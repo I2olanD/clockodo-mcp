@@ -62,8 +62,9 @@ export class ClockodoApiError extends Error {
     public readonly statusCode: number,
     public readonly body: string,
   ) {
-    super(`Clockodo API error ${statusCode}: ${body}`);
+    super(`Clockodo API error: HTTP ${statusCode}`);
     this.name = "ClockodoApiError";
+    process.stderr.write(`[clockodo-mcp] API error ${statusCode}: ${body}\n`);
   }
 }
 
