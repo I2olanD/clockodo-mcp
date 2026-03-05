@@ -56,8 +56,8 @@ describe("handleAddEntry()", () => {
       customers_id: 1,
       services_id: 2,
       billable: 1,
-      time_since: "2026-03-05T09:00:00.000Z",
-      time_until: "2026-03-05T10:00:00.000Z",
+      time_since: "2026-03-05T09:00:00Z",
+      time_until: "2026-03-05T10:00:00Z",
     });
     expect(result).toEqual({
       content: [{ type: "text", text: JSON.stringify(baseEntry, null, 2) }],
@@ -134,6 +134,89 @@ describe("handleAddEntry()", () => {
     expect(result).toEqual({
       content: [{ type: "text", text: "Error: Network failure" }],
       isError: true,
+    });
+  });
+
+  describe("with start_time", () => {
+    it("uses start_time as time_since and calculates time_until", async () => {
+      const client = makeClient({
+        createEntry: vi.fn().mockResolvedValue(baseEntry),
+      });
+
+      await handleAddEntry(client, {
+        customers_id: 1,
+        services_id: 2,
+        duration_minutes: 30,
+        start_time: "2026-03-06T10:00:00Z",
+      });
+
+      expect(client.createEntry).toHaveBeenCalledWith({
+        customers_id: 1,
+        services_id: 2,
+        billable: 1,
+        time_since: "2026-03-06T10:00:00Z",
+        time_until: "2026-03-06T10:30:00Z",
+      });
+    });
+
+    it("normalizes timezone offset to UTC", async () => {
+      const client = makeClient({
+        createEntry: vi.fn().mockResolvedValue(baseEntry),
+      });
+
+      await handleAddEntry(client, {
+        customers_id: 1,
+        services_id: 2,
+        duration_minutes: 30,
+        start_time: "2026-03-06T10:00:00+01:00",
+      });
+
+      expect(client.createEntry).toHaveBeenCalledWith(
+        expect.objectContaining({
+          time_since: "2026-03-06T09:00:00Z",
+          time_until: "2026-03-06T09:30:00Z",
+        }),
+      );
+    });
+
+    it("handles midnight crossover", async () => {
+      const client = makeClient({
+        createEntry: vi.fn().mockResolvedValue(baseEntry),
+      });
+
+      await handleAddEntry(client, {
+        customers_id: 1,
+        services_id: 2,
+        duration_minutes: 30,
+        start_time: "2026-03-05T23:45:00Z",
+      });
+
+      expect(client.createEntry).toHaveBeenCalledWith(
+        expect.objectContaining({
+          time_since: "2026-03-05T23:45:00Z",
+          time_until: "2026-03-06T00:15:00Z",
+        }),
+      );
+    });
+
+    it("handles zero duration with custom start_time", async () => {
+      const client = makeClient({
+        createEntry: vi.fn().mockResolvedValue(baseEntry),
+      });
+
+      await handleAddEntry(client, {
+        customers_id: 1,
+        services_id: 2,
+        duration_minutes: 0,
+        start_time: "2026-03-06T10:00:00Z",
+      });
+
+      expect(client.createEntry).toHaveBeenCalledWith(
+        expect.objectContaining({
+          time_since: "2026-03-06T10:00:00Z",
+          time_until: "2026-03-06T10:00:00Z",
+        }),
+      );
     });
   });
 });
