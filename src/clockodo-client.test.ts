@@ -23,7 +23,7 @@ function makePaginatedResponse<T>(dataKey: string, items: T[], currentPage = 1, 
       },
       [dataKey]: items,
     }),
-  };
+  } as Response;
 }
 
 function makeResponse(body: unknown, ok = true) {
@@ -33,7 +33,7 @@ function makeResponse(body: unknown, ok = true) {
     status: ok ? 200 : ((body as { status: number }).status ?? 400),
     text: async () => bodyText,
     json: async () => body,
-  };
+  } as unknown as Response;
 }
 
 function makeErrorResponse(status: number, bodyText: string) {
@@ -44,15 +44,15 @@ function makeErrorResponse(status: number, bodyText: string) {
     json: async () => {
       throw new Error("not json");
     },
-  };
+  } as unknown as Response;
 }
 
 describe("ClockodoClient", () => {
-  let mockFetch: ReturnType<typeof vi.fn>;
+  let mockFetch: ReturnType<typeof vi.fn<typeof fetch>>;
   let client: ClockodoClient;
 
   beforeEach(() => {
-    mockFetch = vi.fn();
+    mockFetch = vi.fn<typeof fetch>();
     global.fetch = mockFetch;
     client = new ClockodoClient(EMAIL, API_KEY);
   });
@@ -116,7 +116,7 @@ describe("ClockodoClient", () => {
         ok: true,
         text: async () => "",
         json: async () => ({ services }),
-      });
+      } as Response);
 
       const result = await client.listServices();
 
