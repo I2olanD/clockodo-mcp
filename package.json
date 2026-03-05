@@ -30,6 +30,7 @@
     "time-tracking",
     "model-context-protocol"
   ],
+  "packageManager": "pnpm@10.30.2",
   "engines": {
     "node": ">=18"
   },
