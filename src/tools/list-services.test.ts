@@ -1,8 +1,10 @@
-import { describe, it, expect, vi } from "vitest";
-import { handleListServices } from "./list-services.js";
+import { describe, expect, it, vi } from "vitest";
 import type { ClockodoClient, Service } from "../clockodo-client.js";
+import { handleListServices } from "./list-services.js";
 
-function makeClient(overrides: Partial<Record<keyof ClockodoClient, unknown>> = {}): ClockodoClient {
+function makeClient(
+  overrides: Partial<Record<keyof ClockodoClient, unknown>> = {},
+): ClockodoClient {
   return {
     listServices: vi.fn(),
     ...overrides,
@@ -38,7 +40,9 @@ describe("handleListServices()", () => {
 
   it("returns isError true with error message when client throws", async () => {
     const client = makeClient({
-      listServices: vi.fn().mockRejectedValueOnce(new Error("Clockodo API error 401: Unauthorized")),
+      listServices: vi
+        .fn()
+        .mockRejectedValueOnce(new Error("Clockodo API error 401: Unauthorized")),
     });
 
     const result = await handleListServices(client);

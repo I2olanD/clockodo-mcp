@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  ClockodoClient,
   ClockodoApiError,
+  ClockodoClient,
+  type CreateEntryParams,
   type Customer,
   type Entry,
-  type CreateEntryParams,
 } from "./clockodo-client.js";
 
 const EMAIL = "test@example.com";
@@ -15,7 +15,12 @@ function makePaginatedResponse<T>(dataKey: string, items: T[], currentPage = 1, 
     ok: true,
     text: async () => "",
     json: async () => ({
-      paging: { items_per_page: 50, current_page: currentPage, count_pages: countPages, count_items: items.length },
+      paging: {
+        items_per_page: 50,
+        current_page: currentPage,
+        count_pages: countPages,
+        count_items: items.length,
+      },
       [dataKey]: items,
     }),
   };
@@ -25,7 +30,7 @@ function makeResponse(body: unknown, ok = true) {
   const bodyText = JSON.stringify(body);
   return {
     ok,
-    status: ok ? 200 : (body as { status: number }).status ?? 400,
+    status: ok ? 200 : ((body as { status: number }).status ?? 400),
     text: async () => bodyText,
     json: async () => body,
   };
@@ -36,7 +41,9 @@ function makeErrorResponse(status: number, bodyText: string) {
     ok: false,
     status,
     text: async () => bodyText,
-    json: async () => { throw new Error("not json"); },
+    json: async () => {
+      throw new Error("not json");
+    },
   };
 }
 
@@ -296,7 +303,9 @@ describe("ClockodoClient", () => {
         time_since: "2026-03-05T08:00:00.000Z",
         time_until: "2026-03-05T08:00:00.000Z",
       };
-      mockFetch.mockResolvedValueOnce(makeResponse({ entry: { ...createdEntry, projects_id: null, text: null, duration: 0 } }));
+      mockFetch.mockResolvedValueOnce(
+        makeResponse({ entry: { ...createdEntry, projects_id: null, text: null, duration: 0 } }),
+      );
 
       await client.createEntry(minimalParams);
 
@@ -326,7 +335,10 @@ describe("ClockodoClient", () => {
       const [url, options] = mockFetch.mock.calls[0] as [string, RequestInit];
       expect(url).toContain("/v2/entries/42");
       expect(options.method).toBe("PUT");
-      expect(JSON.parse(options.body as string)).toEqual({ text: "Updated description", billable: 0 });
+      expect(JSON.parse(options.body as string)).toEqual({
+        text: "Updated description",
+        billable: 0,
+      });
     });
 
     it("sends correct auth headers", async () => {

@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { handleAddEntry } from "./add-entry.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ClockodoClient, Entry } from "../clockodo-client.js";
+import { handleAddEntry } from "./add-entry.js";
 
 function makeClient(overrides: Partial<ClockodoClient> = {}): ClockodoClient {
   return {
@@ -75,9 +75,7 @@ describe("handleAddEntry()", () => {
       duration_minutes: 30,
     });
 
-    expect(client.createEntry).toHaveBeenCalledWith(
-      expect.objectContaining({ billable: 1 }),
-    );
+    expect(client.createEntry).toHaveBeenCalledWith(expect.objectContaining({ billable: 1 }));
   });
 
   it("maps billable=false to 0", async () => {
@@ -93,9 +91,7 @@ describe("handleAddEntry()", () => {
       billable: false,
     });
 
-    expect(client.createEntry).toHaveBeenCalledWith(
-      expect.objectContaining({ billable: 0 }),
-    );
+    expect(client.createEntry).toHaveBeenCalledWith(expect.objectContaining({ billable: 0 }));
   });
 
   it("forwards optional projects_id and text", async () => {

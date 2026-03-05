@@ -1,5 +1,6 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { ClockodoClient } from "../clockodo-client.js";
+import type { ClockodoClient } from "../clockodo-client.js";
 
 export async function handleStopClock(client: ClockodoClient, args: { entry_id: number }) {
   try {
@@ -9,13 +10,18 @@ export async function handleStopClock(client: ClockodoClient, args: { entry_id: 
     };
   } catch (error) {
     return {
-      content: [{ type: "text" as const, text: `Error: ${error instanceof Error ? error.message : String(error)}` }],
+      content: [
+        {
+          type: "text" as const,
+          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
       isError: true,
     };
   }
 }
 
-export function registerStopClock(server: any, client: ClockodoClient) {
+export function registerStopClock(server: McpServer, client: ClockodoClient) {
   server.tool(
     "stop_clock",
     "Stop the currently running Clockodo stopwatch. Returns the stopped entry with final duration.",
