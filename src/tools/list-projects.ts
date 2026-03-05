@@ -1,5 +1,6 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { ClockodoClient } from "../clockodo-client.js";
+import type { ClockodoClient } from "../clockodo-client.js";
 
 export async function handleListProjects(client: ClockodoClient, args: { customers_id?: number }) {
   try {
@@ -9,13 +10,18 @@ export async function handleListProjects(client: ClockodoClient, args: { custome
     };
   } catch (error) {
     return {
-      content: [{ type: "text" as const, text: `Error: ${error instanceof Error ? error.message : String(error)}` }],
+      content: [
+        {
+          type: "text" as const,
+          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
       isError: true,
     };
   }
 }
 
-export function registerListProjects(server: any, client: ClockodoClient) {
+export function registerListProjects(server: McpServer, client: ClockodoClient) {
   server.tool(
     "list_projects",
     "List active Clockodo projects. Optionally filter by customer ID.",

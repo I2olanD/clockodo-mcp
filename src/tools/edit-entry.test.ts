@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
-import { handleEditEntry } from "./edit-entry.js";
+import { describe, expect, it, vi } from "vitest";
 import type { ClockodoClient, Entry } from "../clockodo-client.js";
+import { handleEditEntry } from "./edit-entry.js";
 
 function makeClient(overrides: Partial<ClockodoClient> = {}): ClockodoClient {
   return {
@@ -139,7 +139,7 @@ describe("handleEditEntry()", () => {
 
   it("returns isError true with error message when API returns 404", async () => {
     const client = makeClient({
-      updateEntry: vi.fn().mockRejectedValue(new Error("Clockodo API error 404: Not Found")),
+      updateEntry: vi.fn().mockRejectedValue(new Error("Clockodo API error: HTTP 404")),
     });
 
     const result = await handleEditEntry(client, {
@@ -148,7 +148,7 @@ describe("handleEditEntry()", () => {
     });
 
     expect(result).toEqual({
-      content: [{ type: "text", text: "Error: Clockodo API error 404: Not Found" }],
+      content: [{ type: "text", text: "Error: Clockodo API error: HTTP 404" }],
       isError: true,
     });
   });

@@ -1,14 +1,15 @@
+#!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { ClockodoClient } from "./clockodo-client.js";
+import { registerAddEntry } from "./tools/add-entry.js";
+import { registerEditEntry } from "./tools/edit-entry.js";
+import { registerGetRunningEntry } from "./tools/get-running-entry.js";
 import { registerListCustomers } from "./tools/list-customers.js";
 import { registerListProjects } from "./tools/list-projects.js";
 import { registerListServices } from "./tools/list-services.js";
 import { registerStartClock } from "./tools/start-clock.js";
 import { registerStopClock } from "./tools/stop-clock.js";
-import { registerGetRunningEntry } from "./tools/get-running-entry.js";
-import { registerAddEntry } from "./tools/add-entry.js";
-import { registerEditEntry } from "./tools/edit-entry.js";
 
 const email = process.env.CLOCKODO_EMAIL;
 const apiKey = process.env.CLOCKODO_API_KEY;

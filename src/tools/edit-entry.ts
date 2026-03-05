@@ -1,5 +1,6 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { ClockodoClient, UpdateEntryParams } from "../clockodo-client.js";
+import type { ClockodoClient, UpdateEntryParams } from "../clockodo-client.js";
 
 export async function handleEditEntry(
   client: ClockodoClient,
@@ -24,7 +25,9 @@ export async function handleEditEntry(
 
   if (Object.keys(params).length === 0) {
     return {
-      content: [{ type: "text" as const, text: "Error: At least one field must be provided to update." }],
+      content: [
+        { type: "text" as const, text: "Error: At least one field must be provided to update." },
+      ],
       isError: true,
     };
   }
@@ -36,13 +39,18 @@ export async function handleEditEntry(
     };
   } catch (error) {
     return {
-      content: [{ type: "text" as const, text: `Error: ${error instanceof Error ? error.message : String(error)}` }],
+      content: [
+        {
+          type: "text" as const,
+          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
       isError: true,
     };
   }
 }
 
-export function registerEditEntry(server: any, client: ClockodoClient) {
+export function registerEditEntry(server: McpServer, client: ClockodoClient) {
   server.tool(
     "edit_entry",
     "Edit an existing time entry.",

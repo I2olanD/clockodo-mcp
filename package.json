@@ -1,24 +1,49 @@
 {
   "name": "clockodo-mcp",
   "version": "0.1.0",
+  "mcpName": "io.github.I2olanD/clockodo",
+  "description": "MCP server for Clockodo time tracking API",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "clockodo-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist/"
+  ],
   "scripts": {
+    "build": "tsc -p tsconfig.build.json && chmod +x dist/index.js",
+    "dev": "tsx watch src/index.ts",
     "test": "vitest",
-    "lint": "eslint src",
-    "typecheck": "tsc --noEmit",
-    "build": "tsc",
-    "dev": "tsx watch src/index.ts"
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/I2olanD/clockodo-mcp"
+  },
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "clockodo",
+    "time-tracking",
+    "model-context-protocol"
+  ],
+  "packageManager": "pnpm@10.30.2",
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
-    "zod": "^3.23.8"
+    "@modelcontextprotocol/sdk": "1.27.1",
+    "openai": "6.25.0",
+    "zod": "4.3.6"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "eslint": "^9.0.0",
-    "tsx": "^4.19.0",
-    "typescript": "^5.7.0",
-    "vitest": "^2.1.0"
+    "@biomejs/biome": "2.4.6",
+    "@types/node": "25.3.3",
+    "tsx": "4.19.0",
+    "typescript": "5.9.3",
+    "vitest": "4.0.18"
   }
 }
