@@ -1,4 +1,5 @@
-import { ClockodoClient } from "../clockodo-client.js";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { ClockodoClient } from "../clockodo-client.js";
 
 export async function handleListServices(client: ClockodoClient) {
   try {
@@ -8,13 +9,18 @@ export async function handleListServices(client: ClockodoClient) {
     };
   } catch (error) {
     return {
-      content: [{ type: "text" as const, text: `Error: ${error instanceof Error ? error.message : String(error)}` }],
+      content: [
+        {
+          type: "text" as const,
+          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
       isError: true,
     };
   }
 }
 
-export function registerListServices(server: any, client: ClockodoClient) {
+export function registerListServices(server: McpServer, client: ClockodoClient) {
   server.tool(
     "list_services",
     "List all active Clockodo services (Leistungen). Returns service IDs and names for selection.",

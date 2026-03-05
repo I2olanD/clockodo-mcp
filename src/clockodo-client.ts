@@ -170,7 +170,10 @@ export class ClockodoClient {
     params?: Record<string, string>,
   ): Promise<T[]> {
     const firstResponse = await this.request(path, {}, params);
-    const firstBody = (await firstResponse.json()) as { paging: PagingInfo; [key: string]: unknown };
+    const firstBody = (await firstResponse.json()) as {
+      paging: PagingInfo;
+      [key: string]: unknown;
+    };
 
     if (!firstBody.paging) return (firstBody[dataKey] as T[]) ?? [];
     if (firstBody.paging.count_pages === 0) return [];

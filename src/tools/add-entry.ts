@@ -1,5 +1,6 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { ClockodoClient } from "../clockodo-client.js";
+import type { ClockodoClient } from "../clockodo-client.js";
 
 export async function handleAddEntry(
   client: ClockodoClient,
@@ -40,13 +41,18 @@ export async function handleAddEntry(
     };
   } catch (error) {
     return {
-      content: [{ type: "text" as const, text: `Error: ${error instanceof Error ? error.message : String(error)}` }],
+      content: [
+        {
+          type: "text" as const,
+          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
       isError: true,
     };
   }
 }
 
-export function registerAddEntry(server: any, client: ClockodoClient) {
+export function registerAddEntry(server: McpServer, client: ClockodoClient) {
   server.tool(
     "add_entry",
     "Add a completed time entry with duration in minutes. Optionally provide a start_time to anchor the entry at a specific time.",

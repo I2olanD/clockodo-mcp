@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
-import { handleStartClock } from "./start-clock.js";
+import { describe, expect, it, vi } from "vitest";
 import type { ClockodoClient, Entry } from "../clockodo-client.js";
 import { ClockodoApiError } from "../clockodo-client.js";
+import { handleStartClock } from "./start-clock.js";
 
 function makeClient(overrides: Partial<ClockodoClient> = {}): ClockodoClient {
   return {
@@ -46,9 +46,17 @@ describe("handleStartClock()", () => {
       startClock: vi.fn().mockResolvedValue(entryWithProject),
     });
 
-    const result = await handleStartClock(client, { customers_id: 1, services_id: 2, projects_id: 5 });
+    const result = await handleStartClock(client, {
+      customers_id: 1,
+      services_id: 2,
+      projects_id: 5,
+    });
 
-    expect(client.startClock).toHaveBeenCalledWith({ customers_id: 1, services_id: 2, projects_id: 5 });
+    expect(client.startClock).toHaveBeenCalledWith({
+      customers_id: 1,
+      services_id: 2,
+      projects_id: 5,
+    });
     expect(result).toEqual({
       content: [{ type: "text", text: JSON.stringify(entryWithProject, null, 2) }],
     });
@@ -60,9 +68,17 @@ describe("handleStartClock()", () => {
       startClock: vi.fn().mockResolvedValue(entryWithText),
     });
 
-    const result = await handleStartClock(client, { customers_id: 1, services_id: 2, text: "Implementing feature X" });
+    const result = await handleStartClock(client, {
+      customers_id: 1,
+      services_id: 2,
+      text: "Implementing feature X",
+    });
 
-    expect(client.startClock).toHaveBeenCalledWith({ customers_id: 1, services_id: 2, text: "Implementing feature X" });
+    expect(client.startClock).toHaveBeenCalledWith({
+      customers_id: 1,
+      services_id: 2,
+      text: "Implementing feature X",
+    });
     expect(result).toEqual({
       content: [{ type: "text", text: JSON.stringify(entryWithText, null, 2) }],
     });
@@ -76,7 +92,12 @@ describe("handleStartClock()", () => {
     const result = await handleStartClock(client, { customers_id: 1, services_id: 2 });
 
     expect(result).toEqual({
-      content: [{ type: "text", text: "A clock is already running. Stop it first before starting a new one." }],
+      content: [
+        {
+          type: "text",
+          text: "A clock is already running. Stop it first before starting a new one.",
+        },
+      ],
       isError: true,
     });
   });

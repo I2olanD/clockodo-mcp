@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
-import { handleGetRunningEntry } from "./get-running-entry.js";
+import { describe, expect, it, vi } from "vitest";
 import type { ClockodoClient, Entry } from "../clockodo-client.js";
+import { handleGetRunningEntry } from "./get-running-entry.js";
 
 function makeClient(overrides: Partial<ClockodoClient> = {}): ClockodoClient {
   return {

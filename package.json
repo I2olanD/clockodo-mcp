@@ -16,7 +16,8 @@
     "prepare": "npm run build",
     "dev": "tsx watch src/index.ts",
     "test": "vitest",
-    "lint": "eslint src",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
     "typecheck": "tsc --noEmit"
   },
   "repository": {
@@ -39,8 +40,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.6",
     "@types/node": "^22.0.0",
-    "eslint": "^9.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
     "vitest": "^2.1.0"

@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
-import { handleListCustomers } from "./list-customers.js";
+import { describe, expect, it, vi } from "vitest";
 import type { ClockodoClient, Customer } from "../clockodo-client.js";
+import { handleListCustomers } from "./list-customers.js";
 
 function makeClient(overrides: Partial<ClockodoClient> = {}): ClockodoClient {
   return {
