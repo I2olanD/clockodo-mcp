@@ -17,7 +17,7 @@ MCP server for the [Clockodo](https://www.clockodo.com) time tracking API.
 
 ```bash
 # Claude Code
-claude mcp add clockodo -e CLOCKODO_EMAIL=your-email@example.com -e CLOCKODO_API_KEY=your-api-key -- npx clockodo-mcp
+claude mcp add clockodo -e CLOCKODO_EMAIL=your-email@example.com -e CLOCKODO_API_KEY=your-api-key -- npx clockodo-mcp@latest
 ```
 
 3. Start using it — ask your AI assistant to track time:
@@ -55,7 +55,7 @@ Add to your Claude Desktop configuration file:
   "mcpServers": {
     "clockodo": {
       "command": "npx",
-      "args": ["-y", "clockodo-mcp"],
+      "args": ["-y", "clockodo-mcp@latest"],
       "env": {
         "CLOCKODO_EMAIL": "your-email@example.com",
         "CLOCKODO_API_KEY": "your-api-key"
@@ -80,7 +80,7 @@ Or add it manually to `.claude/settings.json`:
   "mcpServers": {
     "clockodo": {
       "command": "npx",
-      "args": ["-y", "clockodo-mcp"],
+      "args": ["-y", "clockodo-mcp@latest"],
       "env": {
         "CLOCKODO_EMAIL": "your-email@example.com",
         "CLOCKODO_API_KEY": "your-api-key"
@@ -92,14 +92,18 @@ Or add it manually to `.claude/settings.json`:
 
 ### opencode
 
-Add to your `opencode.json` configuration - make sure you have $CLOCKODO_EMAIL and $CLOCKODO_API_KEY in your environment:
+Add to your `opencode.json` configuration::
 
 ```json
 {
   "mcp": {
     "clockodo": {
       "type": "local",
-      "command": ["npx", "-y", "clockodo-mcp@latest"]
+      "command": ["npx", "-y", "clockodo-mcp@latest"],
+      "environment": {
+        "CLOCKODO_EMAIL": "Your clockdo email address",
+        "CLOCKODO_API_KEY": "Your clockdo api key"
+      }
     }
   }
 }
