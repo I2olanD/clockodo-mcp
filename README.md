@@ -92,18 +92,14 @@ Or add it manually to `.claude/settings.json`:
 
 ### opencode
 
-Add to your `opencode.json` configuration:
+Add to your `opencode.json` configuration - make sure you have $CLOCKODO_EMAIL and $CLOCKODO_API_KEY in your environment:
 
 ```json
 {
   "mcp": {
     "clockodo": {
-      "command": "npx",
-      "args": ["-y", "clockodo-mcp"],
-      "env": {
-        "CLOCKODO_EMAIL": "your-email@example.com",
-        "CLOCKODO_API_KEY": "your-api-key"
-      }
+      "type": "local",
+      "command": ["npx", "-y", "clockodo-mcp@latest"]
     }
   }
 }
