@@ -1,22 +1,13 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ClockodoClient } from "../clockodo-client.js";
+import { errorResponse, successResponse } from "./tool-response.js";
 
 export async function handleListServices(client: ClockodoClient) {
   try {
     const services = await client.listServices();
-    return {
-      content: [{ type: "text" as const, text: JSON.stringify(services, null, 2) }],
-    };
+    return successResponse(services);
   } catch (error) {
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-        },
-      ],
-      isError: true,
-    };
+    return errorResponse(error);
   }
 }
 

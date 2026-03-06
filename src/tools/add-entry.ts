@@ -1,6 +1,11 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { ClockodoClient } from "../clockodo-client.js";
+import { errorResponse, successResponse } from "./tool-response.js";
+
+function toClockodoIsoString(date: Date): string {
+  return date.toISOString().replace(/\.\d{3}Z$/, "Z");
+}
 
 export async function handleAddEntry(
   client: ClockodoClient,
@@ -30,25 +35,15 @@ export async function handleAddEntry(
       customers_id: args.customers_id,
       services_id: args.services_id,
       billable: args.billable === false ? 0 : 1,
-      time_since: timeSince.toISOString().replace(/\.\d{3}Z$/, "Z"),
-      time_until: timeUntil.toISOString().replace(/\.\d{3}Z$/, "Z"),
+      time_since: toClockodoIsoString(timeSince),
+      time_until: toClockodoIsoString(timeUntil),
       projects_id: args.projects_id,
       text: args.text,
     });
 
-    return {
-      content: [{ type: "text" as const, text: JSON.stringify(entry, null, 2) }],
-    };
+    return successResponse(entry);
   } catch (error) {
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-        },
-      ],
-      isError: true,
-    };
+    return errorResponse(error);
   }
 }
 
@@ -71,14 +66,6 @@ export function registerAddEntry(server: McpServer, client: ClockodoClient) {
           "Entry start time as ISO 8601 (e.g. '2026-03-06T10:00:00Z' or '2026-03-06T10:00:00+01:00'). Defaults to now minus duration if omitted.",
         ),
     },
-    (args: {
-      customers_id: number;
-      services_id: number;
-      duration_minutes: number;
-      projects_id?: number;
-      text?: string;
-      billable?: boolean;
-      start_time?: string;
-    }) => handleAddEntry(client, args),
+    (args) => handleAddEntry(client, args),
   );
 }

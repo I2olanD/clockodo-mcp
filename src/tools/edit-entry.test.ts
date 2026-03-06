@@ -1,20 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import type { ClockodoClient, Entry } from "../clockodo-client.js";
+import type { Entry } from "../clockodo-client.js";
 import { handleEditEntry } from "./edit-entry.js";
-
-function makeClient(overrides: Partial<ClockodoClient> = {}): ClockodoClient {
-  return {
-    listCustomers: vi.fn(),
-    listProjects: vi.fn(),
-    listServices: vi.fn(),
-    getRunningEntry: vi.fn(),
-    startClock: vi.fn(),
-    stopClock: vi.fn(),
-    createEntry: vi.fn(),
-    updateEntry: vi.fn(),
-    ...overrides,
-  } as unknown as ClockodoClient;
-}
+import { makeClient } from "./test-helpers.js";
 
 const baseEntry: Entry = {
   id: 42,
@@ -75,6 +62,23 @@ describe("handleEditEntry()", () => {
     });
 
     expect(client.updateEntry).toHaveBeenCalledWith(42, { customers_id: 7 });
+    expect(result).toEqual({
+      content: [{ type: "text", text: JSON.stringify(updatedEntry, null, 2) }],
+    });
+  });
+
+  it("updates services_id and returns JSON", async () => {
+    const updatedEntry: Entry = { ...baseEntry, services_id: 5 };
+    const client = makeClient({
+      updateEntry: vi.fn().mockResolvedValue(updatedEntry),
+    });
+
+    const result = await handleEditEntry(client, {
+      entry_id: 42,
+      services_id: 5,
+    });
+
+    expect(client.updateEntry).toHaveBeenCalledWith(42, { services_id: 5 });
     expect(result).toEqual({
       content: [{ type: "text", text: JSON.stringify(updatedEntry, null, 2) }],
     });

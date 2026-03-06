@@ -97,15 +97,12 @@ describe("ClockodoClient", () => {
       expect(url).toContain("filter%5Bactive%5D=true");
     });
 
-    it("returns cached data on second call", async () => {
-      const items: Customer[] = [{ id: 1, name: "Acme", active: true }];
-      mockFetch.mockResolvedValueOnce(makePaginatedResponse("customers", items));
+    it("returns empty array when paging reports count_pages=0", async () => {
+      mockFetch.mockResolvedValueOnce(makePaginatedResponse("customers", [], 1, 0));
 
-      await client.listCustomers();
-      const second = await client.listCustomers();
+      const result = await client.listCustomers();
 
-      expect(mockFetch).toHaveBeenCalledTimes(1);
-      expect(second).toEqual(items);
+      expect(result).toEqual([]);
     });
   });
 
@@ -122,6 +119,7 @@ describe("ClockodoClient", () => {
 
       expect(result).toEqual(services);
     });
+
   });
 
   describe("listProjects()", () => {
@@ -142,6 +140,19 @@ describe("ClockodoClient", () => {
       const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
       expect(url).not.toContain("customers_id");
       expect(url).toContain("filter%5Bactive%5D=true");
+    });
+
+    it("fetches separately for different customersId values", async () => {
+      const projectsA = [{ id: 1, name: "Alpha", customers_id: 10, active: true }];
+      const projectsB = [{ id: 2, name: "Beta", customers_id: 20, active: true }];
+      mockFetch
+        .mockResolvedValueOnce(makePaginatedResponse("projects", projectsA))
+        .mockResolvedValueOnce(makePaginatedResponse("projects", projectsB));
+
+      await client.listProjects(10);
+      await client.listProjects(20);
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -172,16 +183,6 @@ describe("ClockodoClient", () => {
       expect(result).toBeNull();
     });
 
-    it("is never cached — always fetches", async () => {
-      mockFetch
-        .mockResolvedValueOnce(makeResponse({ running: null }))
-        .mockResolvedValueOnce(makeResponse({ running: null }));
-
-      await client.getRunningEntry();
-      await client.getRunningEntry();
-
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-    });
   });
 
   describe("startClock()", () => {

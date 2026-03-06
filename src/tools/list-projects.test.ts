@@ -1,15 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ClockodoClient, Project } from "../clockodo-client.js";
 import { handleListProjects } from "./list-projects.js";
-
-function makeClient(
-  overrides: Partial<Record<keyof ClockodoClient, unknown>> = {},
-): ClockodoClient {
-  return {
-    listProjects: vi.fn(),
-    ...overrides,
-  } as unknown as ClockodoClient;
-}
+import { makeClient } from "./test-helpers.js";
 
 const PROJECT_A: Project = { id: 1, name: "Alpha", customers_id: 10, active: true };
 const PROJECT_B: Project = { id: 2, name: "Beta", customers_id: 20, active: true };
@@ -55,7 +47,7 @@ describe("handleListProjects()", () => {
 
     const result = await handleListProjects(client, {});
 
-    expect(result.isError).toBe(true);
+    expect(result).toHaveProperty("isError", true);
     expect(result.content[0].text).toBe("Error: Clockodo API error: HTTP 401");
   });
 });

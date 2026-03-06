@@ -1,19 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import type { ClockodoClient, Entry } from "../clockodo-client.js";
+import type { Entry } from "../clockodo-client.js";
 import { ClockodoApiError } from "../clockodo-client.js";
 import { handleStartClock } from "./start-clock.js";
-
-function makeClient(overrides: Partial<ClockodoClient> = {}): ClockodoClient {
-  return {
-    listCustomers: vi.fn(),
-    listProjects: vi.fn(),
-    listServices: vi.fn(),
-    getRunningEntry: vi.fn(),
-    startClock: vi.fn(),
-    stopClock: vi.fn(),
-    ...overrides,
-  } as unknown as ClockodoClient;
-}
+import { makeClient } from "./test-helpers.js";
 
 const baseEntry: Entry = {
   id: 99,

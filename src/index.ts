@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { createRequire } from "node:module";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { ClockodoClient } from "./clockodo-client.js";
@@ -11,6 +12,9 @@ import { registerListServices } from "./tools/list-services.js";
 import { registerStartClock } from "./tools/start-clock.js";
 import { registerStopClock } from "./tools/stop-clock.js";
 
+const require = createRequire(import.meta.url);
+const { version } = require("../package.json") as { version: string };
+
 const email = process.env.CLOCKODO_EMAIL;
 const apiKey = process.env.CLOCKODO_API_KEY;
 
@@ -21,7 +25,7 @@ if (!email || !apiKey) {
 
 const server = new McpServer({
   name: "clockodo-mcp",
-  version: "0.1.0",
+  version,
 });
 
 const client = new ClockodoClient(email, apiKey);

@@ -1,35 +1,40 @@
-import { TtlCache } from "./cache.js";
+import { z } from "zod";
 
-export interface Customer {
-  id: number;
-  name: string;
-  active: boolean;
-}
+const CustomerSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  active: z.boolean(),
+});
 
-export interface Project {
-  id: number;
-  name: string;
-  customers_id: number;
-  active: boolean;
-}
+const ProjectSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  customers_id: z.number(),
+  active: z.boolean(),
+});
 
-export interface Service {
-  id: number;
-  name: string;
-  active: boolean;
-}
+const ServiceSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  active: z.boolean(),
+});
 
-export interface Entry {
-  id: number;
-  customers_id: number;
-  projects_id: number | null;
-  services_id: number;
-  text: string | null;
-  time_since: string;
-  time_until: string | null;
-  duration: number;
-  billable?: number;
-}
+const EntrySchema = z.object({
+  id: z.number(),
+  customers_id: z.number(),
+  projects_id: z.number().nullable(),
+  services_id: z.number(),
+  text: z.string().nullable(),
+  time_since: z.string(),
+  time_until: z.string().nullable(),
+  duration: z.number(),
+  billable: z.number().optional(),
+});
+
+export type Customer = z.infer<typeof CustomerSchema>;
+export type Project = z.infer<typeof ProjectSchema>;
+export type Service = z.infer<typeof ServiceSchema>;
+export type Entry = z.infer<typeof EntrySchema>;
 
 export interface CreateEntryParams {
   customers_id: number;
@@ -64,71 +69,51 @@ export class ClockodoApiError extends Error {
   ) {
     super(`Clockodo API error: HTTP ${statusCode}`);
     this.name = "ClockodoApiError";
-    process.stderr.write(`[clockodo-mcp] API error ${statusCode}: ${body}\n`);
   }
 }
 
-interface PagingInfo {
-  current_page: number;
-  count_pages: number;
-}
+const PagingSchema = z.object({
+  current_page: z.number(),
+  count_pages: z.number(),
+});
+
+const RunningEntryResponse = z.object({ running: EntrySchema.nullable() });
+const StoppedEntryResponse = z.object({ stopped: EntrySchema });
+const EntryResponse = z.object({ entry: EntrySchema });
 
 const BASE_URL = "https://my.clockodo.com/api";
 
 export class ClockodoClient {
   private readonly headers: Record<string, string>;
-  private readonly cache: TtlCache;
 
-  constructor(email: string, apiKey: string, cache?: TtlCache) {
+  constructor(email: string, apiKey: string) {
     this.headers = {
       "X-ClockodoApiUser": email,
       "X-ClockodoApiKey": apiKey,
       "X-Clockodo-External-Application": `clockodo-mcp;${email}`,
       "Content-Type": "application/json",
     };
-    this.cache = cache ?? new TtlCache();
   }
 
   async listCustomers(): Promise<Customer[]> {
-    const cacheKey = "customers";
-    const cached = this.cache.get<Customer[]>(cacheKey);
-    if (cached !== undefined) return cached;
-
-    const result = await this.fetchAllPages<Customer>("/v2/customers", "customers", {
-      "filter[active]": "true",
-    });
-    this.cache.set(cacheKey, result);
-    return result;
+    return this.fetchAllPages<Customer>("/v2/customers", "customers", { "filter[active]": "true" });
   }
 
   async listProjects(customersId?: number): Promise<Project[]> {
-    const cacheKey = `projects:${customersId ?? "all"}`;
-    const cached = this.cache.get<Project[]>(cacheKey);
-    if (cached !== undefined) return cached;
-
     const params: Record<string, string> = { "filter[active]": "true" };
     if (customersId !== undefined) {
       params["filter[customers_id]"] = String(customersId);
     }
-
-    const result = await this.fetchAllPages<Project>("/v2/projects", "projects", params);
-    this.cache.set(cacheKey, result);
-    return result;
+    return this.fetchAllPages<Project>("/v2/projects", "projects", params);
   }
 
   async listServices(): Promise<Service[]> {
-    const cacheKey = "services";
-    const cached = this.cache.get<Service[]>(cacheKey);
-    if (cached !== undefined) return cached;
-
-    const result = await this.fetchAllPages<Service>("/v2/services", "services");
-    this.cache.set(cacheKey, result);
-    return result;
+    return this.fetchAllPages<Service>("/v2/services", "services");
   }
 
   async getRunningEntry(): Promise<Entry | null> {
     const response = await this.request("/v2/clock");
-    const body = (await response.json()) as { running: Entry | null };
+    const body = RunningEntryResponse.parse(await response.json());
     return body.running ?? null;
   }
 
@@ -137,13 +122,13 @@ export class ClockodoClient {
       method: "POST",
       body: JSON.stringify(params),
     });
-    const body = (await response.json()) as { running: Entry };
-    return body.running;
+    const body = RunningEntryResponse.parse(await response.json());
+    return body.running as Entry;
   }
 
   async stopClock(entryId: number): Promise<Entry> {
     const response = await this.request(`/v2/clock/${entryId}`, { method: "DELETE" });
-    const body = (await response.json()) as { stopped: Entry };
+    const body = StoppedEntryResponse.parse(await response.json());
     return body.stopped;
   }
 
@@ -152,7 +137,7 @@ export class ClockodoClient {
       method: "POST",
       body: JSON.stringify(params),
     });
-    const body = (await response.json()) as { entry: Entry };
+    const body = EntryResponse.parse(await response.json());
     return body.entry;
   }
 
@@ -161,7 +146,7 @@ export class ClockodoClient {
       method: "PUT",
       body: JSON.stringify(params),
     });
-    const body = (await response.json()) as { entry: Entry };
+    const body = EntryResponse.parse(await response.json());
     return body.entry;
   }
 
@@ -171,23 +156,27 @@ export class ClockodoClient {
     params?: Record<string, string>,
   ): Promise<T[]> {
     const firstResponse = await this.request(path, {}, params);
-    const firstBody = (await firstResponse.json()) as {
-      paging: PagingInfo;
-      [key: string]: unknown;
-    };
+    const firstBody = (await firstResponse.json()) as Record<string, unknown>;
+    const pagingResult = PagingSchema.safeParse(firstBody.paging);
 
-    if (!firstBody.paging) return (firstBody[dataKey] as T[]) ?? [];
-    if (firstBody.paging.count_pages === 0) return [];
+    if (!pagingResult.success) return (firstBody[dataKey] as T[]) ?? [];
+    if (pagingResult.data.count_pages === 0) return [];
 
     const results: T[] = [...(firstBody[dataKey] as T[])];
-    let currentPage = firstBody.paging.current_page;
-    const totalPages = firstBody.paging.count_pages;
+    const totalPages = pagingResult.data.count_pages;
 
-    while (currentPage < totalPages) {
-      currentPage += 1;
-      const response = await this.request(path, {}, { ...params, page: String(currentPage) });
-      const body = (await response.json()) as { paging: PagingInfo; [key: string]: unknown };
-      results.push(...(body[dataKey] as T[]));
+    if (totalPages > 1) {
+      const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
+      const pageResults = await Promise.all(
+        remainingPages.map(async (page) => {
+          const response = await this.request(path, {}, { ...params, page: String(page) });
+          const body = (await response.json()) as { [key: string]: unknown };
+          return body[dataKey] as T[];
+        }),
+      );
+      for (const items of pageResults) {
+        results.push(...items);
+      }
     }
 
     return results;
@@ -212,6 +201,7 @@ export class ClockodoClient {
 
     if (!response.ok) {
       const body = await response.text();
+      process.stderr.write(`[clockodo-mcp] API error ${response.status}: ${body}\n`);
       throw new ClockodoApiError(response.status, body);
     }
 

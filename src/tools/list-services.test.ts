@@ -1,15 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import type { ClockodoClient, Service } from "../clockodo-client.js";
+import type { Service } from "../clockodo-client.js";
 import { handleListServices } from "./list-services.js";
-
-function makeClient(
-  overrides: Partial<Record<keyof ClockodoClient, unknown>> = {},
-): ClockodoClient {
-  return {
-    listServices: vi.fn(),
-    ...overrides,
-  } as unknown as ClockodoClient;
-}
+import { makeClient } from "./test-helpers.js";
 
 describe("handleListServices()", () => {
   it("returns all services as JSON text content", async () => {
@@ -24,7 +16,7 @@ describe("handleListServices()", () => {
     expect(result).toEqual({
       content: [{ type: "text", text: JSON.stringify(services, null, 2) }],
     });
-    expect(result.isError).toBeUndefined();
+    expect(result).not.toHaveProperty("isError");
   });
 
   it("returns empty array JSON when no services exist", async () => {
@@ -35,7 +27,7 @@ describe("handleListServices()", () => {
     expect(result).toEqual({
       content: [{ type: "text", text: "[]" }],
     });
-    expect(result.isError).toBeUndefined();
+    expect(result).not.toHaveProperty("isError");
   });
 
   it("returns isError true with error message when client throws", async () => {
@@ -45,7 +37,7 @@ describe("handleListServices()", () => {
 
     const result = await handleListServices(client);
 
-    expect(result.isError).toBe(true);
+    expect(result).toHaveProperty("isError", true);
     expect(result.content).toEqual([{ type: "text", text: "Error: Clockodo API error: HTTP 401" }]);
   });
 });

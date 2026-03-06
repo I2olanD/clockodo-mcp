@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ClockodoApiError, type ClockodoClient } from "../clockodo-client.js";
+import { errorResponse, successResponse } from "./tool-response.js";
 
 export async function handleStartClock(
   client: ClockodoClient,
@@ -8,9 +9,7 @@ export async function handleStartClock(
 ) {
   try {
     const entry = await client.startClock(args);
-    return {
-      content: [{ type: "text" as const, text: JSON.stringify(entry, null, 2) }],
-    };
+    return successResponse(entry);
   } catch (error) {
     if (error instanceof ClockodoApiError && error.statusCode === 409) {
       return {
@@ -23,15 +22,7 @@ export async function handleStartClock(
         isError: true,
       };
     }
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-        },
-      ],
-      isError: true,
-    };
+    return errorResponse(error);
   }
 }
 
@@ -45,7 +36,6 @@ export function registerStartClock(server: McpServer, client: ClockodoClient) {
       projects_id: z.number().int().min(1).optional().describe("Project ID"),
       text: z.string().max(1000).optional().describe("Entry description"),
     },
-    (args: { customers_id: number; services_id: number; projects_id?: number; text?: string }) =>
-      handleStartClock(client, args),
+    (args) => handleStartClock(client, args),
   );
 }

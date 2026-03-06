@@ -1,23 +1,14 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { ClockodoClient } from "../clockodo-client.js";
+import { errorResponse, successResponse } from "./tool-response.js";
 
 export async function handleStopClock(client: ClockodoClient, args: { entry_id: number }) {
   try {
     const entry = await client.stopClock(args.entry_id);
-    return {
-      content: [{ type: "text" as const, text: JSON.stringify(entry, null, 2) }],
-    };
+    return successResponse(entry);
   } catch (error) {
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-        },
-      ],
-      isError: true,
-    };
+    return errorResponse(error);
   }
 }
 
@@ -28,6 +19,6 @@ export function registerStopClock(server: McpServer, client: ClockodoClient) {
     {
       entry_id: z.number().int().min(1).describe("ID of the running entry to stop"),
     },
-    (args: { entry_id: number }) => handleStopClock(client, args),
+    (args) => handleStopClock(client, args),
   );
 }

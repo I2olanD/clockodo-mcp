@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { ClockodoClient, UpdateEntryParams } from "../clockodo-client.js";
+import { errorResponse, successResponse } from "./tool-response.js";
 
 export async function handleEditEntry(
   client: ClockodoClient,
@@ -34,19 +35,9 @@ export async function handleEditEntry(
 
   try {
     const entry = await client.updateEntry(args.entry_id, params);
-    return {
-      content: [{ type: "text" as const, text: JSON.stringify(entry, null, 2) }],
-    };
+    return successResponse(entry);
   } catch (error) {
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-        },
-      ],
-      isError: true,
-    };
+    return errorResponse(error);
   }
 }
 
@@ -63,14 +54,6 @@ export function registerEditEntry(server: McpServer, client: ClockodoClient) {
       text: z.string().max(1000).optional().describe("New entry description"),
       billable: z.boolean().optional().describe("New billable status"),
     },
-    (args: {
-      entry_id: number;
-      customers_id?: number;
-      services_id?: number;
-      projects_id?: number;
-      duration_minutes?: number;
-      text?: string;
-      billable?: boolean;
-    }) => handleEditEntry(client, args),
+    (args) => handleEditEntry(client, args),
   );
 }
