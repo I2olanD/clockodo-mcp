@@ -119,7 +119,6 @@ describe("ClockodoClient", () => {
 
       expect(result).toEqual(services);
     });
-
   });
 
   describe("listProjects()", () => {
@@ -182,7 +181,6 @@ describe("ClockodoClient", () => {
 
       expect(result).toBeNull();
     });
-
   });
 
   describe("startClock()", () => {
