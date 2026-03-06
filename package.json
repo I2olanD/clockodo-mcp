@@ -1,6 +1,6 @@
 {
   "name": "clockodo-mcp",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "mcpName": "io.github.I2olanD/clockodo",
   "description": "MCP server for Clockodo time tracking API",
   "type": "module",
